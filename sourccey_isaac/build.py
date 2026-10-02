@@ -5,6 +5,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 from pxr import Gf, Usd, UsdGeom, UsdPhysics, UsdLux, PhysxSchema, Sdf
 from .model import ROOT, SOURCE, USD, RobotModel, WHEELS, mesh_points, vector
+from .camera_config import CAMERA_NAMES, CAMERA_PATHS, CAMERA_POSES, CAMERA_SOURCE
 
 
 def quat(matrix):
@@ -125,6 +126,27 @@ def build():
                     UsdShade.Material(contact_material.GetPrim()), UsdShade.Tokens.weakerThanDescendants, 'physics')
             else:
                 g.CreateDisplayColorAttr([Gf.Vec3f(*map(float, vector(geom.get('rgba'))[:3]))])
+    # Keep the fitted optical poses in their original CAD-local body frames.
+    # The base camera source calls base_link "robot_root"; fixed descendants
+    # are transformed into their merged Isaac rigid body's frame.
+    for name in CAMERA_NAMES:
+        source = CAMERA_POSES[name]
+        body_name = 'base_link' if source['body'] == 'robot_root' else source['body']
+        group_name, body_in_group = model.original_frames[body_name]
+        camera_in_body = np.eye(4)
+        camera_in_body[:3, 3] = source['pos']
+        w, x, y, z = source['quat_wxyz']
+        camera_in_body[:3, :3] = Rotation.from_quat([x, y, z, w]).as_matrix()
+        camera_path = CAMERA_PATHS[name]
+        assert camera_path.startswith(f'/World/Sourccey/{group_name}/')
+        camera = UsdGeom.Camera.Define(stage, camera_path)
+        pose(camera.GetPrim(), body_in_group @ camera_in_body)
+        fovy = np.deg2rad(source['fovy_deg'])
+        vertical_aperture = 24.0
+        camera.CreateVerticalApertureAttr(vertical_aperture)
+        camera.CreateHorizontalApertureAttr(vertical_aperture * 4 / 3)
+        camera.CreateFocalLengthAttr(float(vertical_aperture / (2 * np.tan(fovy / 2))))
+        camera.CreateClippingRangeAttr(Gf.Vec2f(.005, 100.0))
     root = stage.GetPrimAtPath('/World/Sourccey/base_link')
     UsdPhysics.ArticulationRootAPI.Apply(root)
     art = PhysxSchema.PhysxArticulationAPI.Apply(root)
@@ -164,6 +186,8 @@ def build():
     light.CreateIntensityAttr(650)
     stage.GetRootLayer().Save()
     metadata = {'source_sha256': hashlib.sha256(SOURCE.read_bytes()).hexdigest(),
+                'camera_source_sha256': hashlib.sha256(CAMERA_SOURCE.read_bytes()).hexdigest(),
+                'cameras': list(CAMERA_NAMES),
                 'joints': list(model.joints), 'joint_count': len(model.joints),
                 'rigid_bodies': len(model.groups), 'mass_kg': sum(g['mass'] for g in model.groups.values()),
                 'startup_pose_si': model.defaults, 'usd': str(USD.relative_to(ROOT)),

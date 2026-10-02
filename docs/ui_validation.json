@@ -1,6 +1,7 @@
 {
   "passed": true,
   "panel_created": true,
+  "camera_selector": true,
   "joint_callback": true,
   "base_callback": true,
   "stop": true,

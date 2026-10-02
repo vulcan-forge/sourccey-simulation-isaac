@@ -1,0 +1,35 @@
+{
+  "cameras": {
+    "front_left": {
+      "path": "/World/Sourccey/base_link/camera_front_left",
+      "mount_position_error_m": 0.0,
+      "mount_rotation_error_rad": 4.0745026797480964e-08,
+      "fovy_error_deg": 1.2381969085595301e-06
+    },
+    "front_right": {
+      "path": "/World/Sourccey/base_link/camera_front_right",
+      "mount_position_error_m": 0.0,
+      "mount_rotation_error_rad": 5.9382521121997605e-08,
+      "fovy_error_deg": 1.2381969085595301e-06
+    },
+    "bottom": {
+      "path": "/World/Sourccey/base_link/camera_bottom",
+      "mount_position_error_m": 0.0,
+      "mount_rotation_error_rad": 4.065133149915121e-08,
+      "fovy_error_deg": 0.0
+    },
+    "wrist_left": {
+      "path": "/World/Sourccey/Gripper_Base_v1_1/camera_wrist_left",
+      "mount_position_error_m": 0.0,
+      "mount_rotation_error_rad": 5.564706162506524e-08,
+      "fovy_error_deg": 1.2381969085595301e-06
+    },
+    "wrist_right": {
+      "path": "/World/Sourccey/Gripper_Base_v1_2/camera_wrist_right",
+      "mount_position_error_m": 0.0,
+      "mount_rotation_error_rad": 2.447429154597231e-08,
+      "fovy_error_deg": 1.2381969085595301e-06
+    }
+  },
+  "passed": true
+}

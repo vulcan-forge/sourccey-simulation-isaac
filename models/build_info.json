@@ -1,5 +1,13 @@
 {
   "source_sha256": "6d471c68142a2d60fc1a03fc744ea8dfb81b5bbf6db5ab9d1c6cf349fe129342",
+  "camera_source_sha256": "6190a6476ec04d5c160bbc965c4315022e233073fb9b51a701b51c9c322f065c",
+  "cameras": [
+    "front_left",
+    "front_right",
+    "bottom",
+    "wrist_left",
+    "wrist_right"
+  ],
   "joints": [
     "rear_right_wheel",
     "rear_left_wheel",

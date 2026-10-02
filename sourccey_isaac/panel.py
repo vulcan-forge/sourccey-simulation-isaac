@@ -2,6 +2,7 @@
 import numpy as np
 import omni.ui as ui
 from .model import ROLES
+from .camera_config import CAMERA_NAMES, CAMERA_PATHS
 
 
 class Panel:
@@ -27,6 +28,17 @@ class Panel:
                         ui.Button('STOP BASE', clicked_fn=self.stop)
                         ui.Button('Reset pose', clicked_fn=self.reset)
                         ui.Button('Pause / resume', clicked_fn=self.pause)
+                    with ui.CollapsableFrame('Simulated cameras (provisional poses)', collapsed=False):
+                        with ui.VStack(spacing=3, height=0):
+                            with ui.HStack(height=25):
+                                ui.Button('Overview', clicked_fn=lambda: self.select_camera(None))
+                                for name in CAMERA_NAMES[:2]:
+                                    ui.Button(name.replace('_', ' '),
+                                              clicked_fn=lambda n=name: self.select_camera(n))
+                            with ui.HStack(height=25):
+                                for name in CAMERA_NAMES[2:]:
+                                    ui.Button(name.replace('_', ' '),
+                                              clicked_fn=lambda n=name: self.select_camera(n))
                     with ui.CollapsableFrame('Base - release a slider to stop', collapsed=False):
                         with ui.VStack(spacing=3, height=0):
                             for axis in ('Forward', 'Left / strafe', 'CCW yaw'):
@@ -101,6 +113,11 @@ class Panel:
         self.stop()
         self.paused = not self.paused
         self.status.text = 'Paused' if self.paused else 'Running'
+
+    def select_camera(self, name):
+        from isaacsim.core.utils.viewports import set_active_viewport_camera
+        set_active_viewport_camera('/OmniverseKit_Persp' if name is None else CAMERA_PATHS[name])
+        self.status.text = ('Overview camera' if name is None else name.replace('_', ' ') + ' camera')
 
     def enable_ik(self, side):
         if not self.syncing:

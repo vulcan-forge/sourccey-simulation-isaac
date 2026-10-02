@@ -30,11 +30,41 @@ run.cmd --headless --seconds 5 --state artifacts\state.json
 run.cmd --validate
 run.cmd --build
 run.cmd --unity-port 8765
+run.cmd --camera-snapshot artifacts\camera_feeds.png --seconds 0.1
+run.cmd --example camera-tour
+run.cmd --example two-arm-reach
+run.cmd --validate-cameras
 ```
 
 `--no-traction` disables the equivalent mecanum forces. `--full-elevator-range`
 extends the bottom elevator endpoint from -0.3104 m to -0.315 m; the upper
 endpoint remains -0.0142 m. `--no-panel` opens only the Isaac interface.
+
+## Simulated cameras and examples
+
+The generated USD contains `front_left`, `front_right`, `bottom`, `wrist_left`,
+and `wrist_right` camera prims under the moving robot bodies. The control panel
+has an expanded **Simulated cameras** section: click a named camera to switch
+the live Isaac viewport, or **Overview** to return. The viewport's native
+camera menu can select these prims too. On this 8 GB GPU, the app renders one
+live viewport at a time rather than five simultaneous ray-traced viewports.
+
+`--camera-snapshot` saves a labeled 320 x 240 image from each camera in one
+contact sheet. The two headless examples run scripted PhysX motion, then save
+the same five-view sheet under `artifacts/examples/`. Both place a solid
+workbench and two colored blocks ahead of the robot as camera scenery;
+`camera-tour` drives forward and tilts both wrists, while `two-arm-reach` uses
+IK to move both arms to nearby reachable targets and reports measured reach
+error. The examples capture after motion because Isaac's standalone Replicator
+capture step resets the
+live articulation handle. Neither is a validated object-grasping task.
+
+The camera source [camera_poses.json](models/source/camera_poses.json) is the
+same provisional MuJoCo pose set. `run.cmd --validate-cameras` verifies that
+the USD body-local mounts and fields of view match the source. These are
+simulated pinhole views, not independently calibrated physical feeds. Some views are
+partly occluded by the CAD shell at the default pose, especially the Isaac
+front-left feed; the bottom mounting angle is still a manual estimate.
 
 ## Controls and defaults
 
