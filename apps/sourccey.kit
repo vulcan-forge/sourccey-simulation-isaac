@@ -1,0 +1,72 @@
+[package]
+title = "Sourccey Isaac"
+description = "Single-robot Sourccey PhysX desktop application"
+version = "1.0.0"
+
+[dependencies]
+"isaacsim.simulation_app" = {}
+"isaacsim.core.api" = {}
+"isaacsim.core.utils" = {}
+"omni.kit.loop-isaac" = {}
+"omni.hydra.rtx" = {}
+"omni.kit.mainwindow" = {}
+"omni.kit.manipulator.camera" = {}
+"omni.kit.viewport.window" = {}
+"omni.kit.viewport.utility" = {}
+"omni.kit.viewport.menubar.camera" = {}
+"omni.kit.viewport.menubar.display" = {}
+"omni.kit.window.stage" = {}
+"omni.kit.window.property" = {}
+"omni.kit.property.bundle" = {}
+"omni.kit.window.toolbar" = {}
+
+[settings.app.exts.folders]
+'++' = [
+    "${app}/../.runtime/apps",
+    "${app}/../.runtime/exts",
+    "${app}/../.runtime/extscache",
+    "${app}/../.runtime/extsDeprecated",
+    "${app}/../.runtime/kit/exts",
+]
+
+[settings.app]
+name = "SourcceyIsaac"
+window.title = "Sourccey | Isaac Sim"
+settings.persistent = false
+vulkan = true
+content.emptyStageOnStart = true
+fastShutdown = true
+file.ignoreUnsavedOnExit = true
+useFabricSceneDelegate = true
+settings.fabricDefaultStageFrameHistoryCount = 3
+runLoops.main.rateLimitEnabled = false
+runLoops.main.manualModeEnabled = true
+player.useFixedTimeStepping = false
+asyncRendering = false
+asyncRenderingLowLatency = false
+renderer.skipWhileMinimized = false
+renderer.sleepMsOnFocus = 0
+renderer.sleepMsOutOfFocus = 0
+viewport.defaults.fillViewport = false
+
+[settings]
+renderer.multiGpu.enabled = false
+renderer.multiGpu.autoEnable = false
+renderer.asyncInit = true
+renderer.gpuEnumeration.glInterop.enabled = false
+rtx-transient.dlssg.enabled = false
+rtx.reflections.enabled = false
+rtx.translucency.enabled = false
+rtx.indirectDiffuse.enabled = false
+exts."omni.kit.renderer.core".present.enabled = false
+exts."omni.usd".locking.onClose = false
+physics.autoPopupSimulationOutputWindow = false
+
+[settings.persistent]
+app.stage.upAxis = "Z"
+simulation.defaultMetersPerUnit = 1.0
+physics.resetOnStop = true
+physics.visualizationDisplayJoints = false
+renderer.startupMessageDisplayed = true
+app.viewport.camMoveVelocity = 0.05
+app.viewport.grid.scale = 1.0

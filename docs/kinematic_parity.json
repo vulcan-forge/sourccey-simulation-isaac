@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "poses": 22,
+  "original_bodies_compared": 132,
+  "moving_bodies": 18,
+  "joints": 17,
+  "mass_kg": 169.0419410325263,
+  "maximum_frame_error": 6.661338147750939e-16,
+  "startup_pose_si": {
+    "linear_actuator": -0.0142,
+    "rear_right_wheel": 0.0,
+    "rear_left_wheel": 0.0,
+    "front_left_wheel": 0.0,
+    "front_right_wheel": 0.0,
+    "left_shoulder_pan": -0.785,
+    "right_shoulder_pan": -0.801,
+    "left_shoulder_lift": 2.01,
+    "right_shoulder_lift": -2.01,
+    "left_elbow_flex": -2.0,
+    "right_elbow_flex": -2.0,
+    "left_wrist_flex": 0.691,
+    "right_wrist_flex": -0.723,
+    "left_wrist_roll": 0.0,
+    "left_gripper": -0.087266463,
+    "right_wrist_roll": 0.0,
+    "right_gripper": -0.087266463
+  }
+}

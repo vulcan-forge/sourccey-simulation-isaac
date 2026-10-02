@@ -1,0 +1,60 @@
+{
+  "passed": true,
+  "panel_created": true,
+  "joint_callback": true,
+  "base_callback": true,
+  "stop": true,
+  "reset": true,
+  "state": {
+    "time": 0.5000000000000003,
+    "base_position": [
+      1.2624077498912811e-05,
+      -2.481788396835327e-05,
+      0.11712508648633957
+    ],
+    "base_quaternion_wxyz": [
+      0.9238779544830322,
+      -7.636845111846924e-08,
+      -2.0489096641540527e-08,
+      0.38268768787384033
+    ],
+    "joints": {
+      "rear_right_wheel": -6.780894909752533e-05,
+      "rear_left_wheel": 1.4945796465326566e-05,
+      "front_left_wheel": 0.00015933960094116628,
+      "front_right_wheel": -5.2519979362841696e-05,
+      "linear_actuator": -0.014209325425326824,
+      "left_shoulder_pan": -0.7850010991096497,
+      "right_shoulder_pan": -0.8009993433952332,
+      "left_shoulder_lift": 2.0100045204162598,
+      "right_shoulder_lift": -2.0099995136260986,
+      "left_elbow_flex": -1.9999934434890747,
+      "right_elbow_flex": -1.9999935626983643,
+      "left_wrist_flex": 0.6909979581832886,
+      "right_wrist_flex": -0.7229979634284973,
+      "left_wrist_roll": -2.618204177906591e-07,
+      "right_wrist_roll": 1.9326097344674054e-07,
+      "left_gripper": -0.08726638555526733,
+      "right_gripper": -0.08726631850004196
+    },
+    "targets": {
+      "linear_actuator": -0.0142,
+      "rear_right_wheel": 0.0,
+      "rear_left_wheel": 0.0,
+      "front_left_wheel": 0.0,
+      "front_right_wheel": 0.0,
+      "left_shoulder_pan": -0.785,
+      "right_shoulder_pan": -0.801,
+      "left_shoulder_lift": 2.01,
+      "right_shoulder_lift": -2.01,
+      "left_elbow_flex": -2.0,
+      "right_elbow_flex": -2.0,
+      "left_wrist_flex": 0.691,
+      "right_wrist_flex": -0.723,
+      "left_wrist_roll": 0.0,
+      "left_gripper": -0.087266463,
+      "right_wrist_roll": 0.0,
+      "right_gripper": -0.087266463
+    }
+  }
+}

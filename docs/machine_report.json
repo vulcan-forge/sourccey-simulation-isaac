@@ -1,0 +1,10 @@
+{
+  "platform": "Windows-11-10.0.26200-SP0",
+  "ram_gb": 31.92803955078125,
+  "ram_available_gb": 13.94561767578125,
+  "disk_free_gb": 152.65983963012695,
+  "gpu": "NVIDIA GeForce RTX 2070 SUPER, 591.86, 8192, 6098",
+  "runtime_installed": true,
+  "target_runtime": "Isaac Sim 5.1.0",
+  "hardware_limit": "Local 8 GB GPU is below the published 16 GB minimum."
+}
