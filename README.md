@@ -4,6 +4,8 @@ The configured Sourccey robot from the sibling MuJoCo project, converted to an
 Isaac Sim USD articulation with PhysX dynamics. All 17 joints, CAD axes, visual
 meshes, masses, joint limits, and startup targets are carried across.
 
+Licensed under the [MIT License](LICENSE). Copyright (c) 2026 Vulcan Robotics.
+
 ![Sourccey rendered in Isaac Sim](docs/preview.png)
 
 ## Launch
