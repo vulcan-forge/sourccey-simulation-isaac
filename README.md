@@ -33,6 +33,7 @@ run.cmd --unity-port 8765
 run.cmd --camera-snapshot artifacts\camera_feeds.png --seconds 0.1
 run.cmd --example camera-tour
 run.cmd --example two-arm-reach
+run.cmd --example workshop-demo --view
 run.cmd --validate-cameras
 ```
 
@@ -58,6 +59,19 @@ IK to move both arms to nearby reachable targets and reports measured reach
 error. The examples capture after motion because Isaac's standalone Replicator
 capture step resets the
 live articulation handle. Neither is a validated object-grasping task.
+
+For a **live pick-and-place simulation**, run `run.cmd --example workshop-demo
+--view`. The robot rolls to a table, opens both hands, reaches down to the red
+and blue parcels, closes its grippers, lifts both parcels, moves them outward,
+and releases them onto colored pads. The control panel shows each phase; choose
+Overview or any of the five simulated cameras while it runs. Pause / resume
+works during playback, and the sequence repeats automatically. The parcels
+have collision and dynamic rigid-body physics when free. The carry uses an
+**assisted kinematic attachment** after the hands approach the parcels, then
+returns them to PhysX when released. This is a visible manipulation demo, not
+proof of a contact-only finger grasp. Run `run.cmd --example
+workshop-demo` without `--view` to run the same sequence headlessly and save
+`artifacts/examples/workshop-demo/workshop_demo.png`.
 
 The camera source [camera_poses.json](models/source/camera_poses.json) is the
 same provisional MuJoCo pose set. `run.cmd --validate-cameras` verifies that

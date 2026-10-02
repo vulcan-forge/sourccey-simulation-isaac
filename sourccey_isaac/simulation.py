@@ -10,7 +10,7 @@ DT = .002
 
 
 class Simulation:
-    def __init__(self, full_elevator_range=False, traction=True):
+    def __init__(self, full_elevator_range=False, traction=True, pickup_props=False):
         self.description = RobotModel()
         self.defaults = self.description.defaults
         self.joint_limits = self.description.limits
@@ -28,6 +28,12 @@ class Simulation:
             local = next(t[:3, 3] for g, t in self.description.groups[body]['geoms']
                          if g.get('name') == 'contact_'+name)
             self.wheels[name] = (view, local)
+        self.props = {}
+        if pickup_props:
+            for side in ('left', 'right'):
+                self.props[side] = self.world.scene.add(RigidPrim(
+                    '/World/PickupDemo/'+side.title()+'Parcel',
+                    name=side+'_parcel', reset_xform_properties=False))
         self.world.reset()
         names = list(self.robot.dof_names)
         if set(names) != set(self.defaults):
