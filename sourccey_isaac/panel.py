@@ -1,5 +1,6 @@
 """Native Isaac control panel, matching the MuJoCo joint and reach controls."""
 import numpy as np
+from pathlib import Path
 import omni.ui as ui
 from .model import ROLES
 from .camera_config import CAMERA_NAMES, CAMERA_PATHS
@@ -39,6 +40,11 @@ class Panel:
                                 for name in CAMERA_NAMES[2:]:
                                     ui.Button(name.replace('_', ' '),
                                               clicked_fn=lambda n=name: self.select_camera(n))
+                    with ui.CollapsableFrame('Forward 2D lidar (provisional mount)', collapsed=False):
+                        with ui.VStack(spacing=3, height=0):
+                            ui.Label('Front 180 degrees | 226 rays | 0.02-12 m | 10 Hz', height=22)
+                            ui.Button('Save lidar scan and XY map', height=28,
+                                      clicked_fn=self.save_lidar)
                     with ui.CollapsableFrame('Base - release a slider to stop', collapsed=False):
                         with ui.VStack(spacing=3, height=0):
                             for axis in ('Forward', 'Left / strafe', 'CCW yaw'):
@@ -118,6 +124,12 @@ class Panel:
         from isaacsim.core.utils.viewports import set_active_viewport_camera
         set_active_viewport_camera('/OmniverseKit_Persp' if name is None else CAMERA_PATHS[name])
         self.status.text = ('Overview camera' if name is None else name.replace('_', ' ') + ' camera')
+
+    def save_lidar(self):
+        from .lidar import save_snapshot
+        output = Path(__file__).resolve().parents[1] / 'artifacts/lidar_scan.json'
+        data_path, image_path = save_snapshot(self.sim, output)
+        self.status.text = f'Saved lidar scan: {image_path} (JSON: {data_path})'
 
     def enable_ik(self, side):
         if not self.syncing:

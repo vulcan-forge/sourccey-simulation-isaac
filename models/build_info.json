@@ -1,6 +1,8 @@
 {
   "source_sha256": "6d471c68142a2d60fc1a03fc744ea8dfb81b5bbf6db5ab9d1c6cf349fe129342",
   "camera_source_sha256": "6190a6476ec04d5c160bbc965c4315022e233073fb9b51a701b51c9c322f065c",
+  "lidar_source_sha256": "a86b8eee756c4d76b66a74ed8acf0d9df9b8d9bc4d8569fefd156a6a7c7e1155",
+  "lidar_prim": "/World/Sourccey/base_link/lidar_scan_origin",
   "cameras": [
     "front_left",
     "front_right",

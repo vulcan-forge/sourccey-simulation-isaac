@@ -34,6 +34,8 @@ run.cmd --camera-snapshot artifacts\camera_feeds.png --seconds 0.1
 run.cmd --example camera-tour
 run.cmd --example two-arm-reach
 run.cmd --example workshop-demo --view
+run.cmd --example lidar-demo
+run.cmd --example lidar-room --view
 run.cmd --validate-cameras
 ```
 
@@ -79,6 +81,50 @@ the USD body-local mounts and fields of view match the source. These are
 simulated pinhole views, not independently calibrated physical feeds. Some views are
 partly occluded by the CAD shell at the default pose, especially the Isaac
 front-left feed; the bottom mounting angle is still a manual estimate.
+
+## Forward planar lidar
+
+The lower front slit has a simulated horizontal slice for the **FHL-LD19**.
+The physical scanner rotates through 360 degrees, but this model exposes only
+the forward 180 degrees through the robot's slit; that aperture is provisional.
+It uses 226 rays at 0.8-degree spacing, a 0.02 m minimum and a 12 m maximum,
+with the LD19's typical 10 Hz scan period recorded in each scan.
+In the control panel, **Save lidar scan and XY map** writes
+`artifacts/lidar_scan.json` and `artifacts/lidar_scan.png`. The PNG shows a
+robot-relative top-down slice, with the sensor at the orange dot and returns
+in green. Scripts can call `sourccey_isaac.lidar.scan(sim)`; `inf` means no
+return. The PhysX query filters the robot's own collision shapes.
+
+To check three known obstacles and view the result:
+
+```powershell
+.\run.cmd --example lidar-demo
+Invoke-Item .\artifacts\examples\lidar-demo\lidar_demo.png
+```
+
+`run.cmd --lidar-snapshot artifacts\lidar_scan.json --seconds 0.1` scans the
+ordinary robot scene. With no obstacles at the scan height, its ranges are
+empty. The optical point now sits inside the front-panel slit: panel-local
+height 0.205 m, robot-forward position 0.17991 m, about 27 mm behind the outer
+front surface. The CAD slice exposes 180.00 degrees at 0.01-degree probe
+resolution there; 1 mm
+inward gives about 178.8 degrees, and 1 mm outward about 181.2 degrees.
+The simulated output is explicitly limited to -90 through +90 degrees.
+The exact real optical center is absent from the URDF;
+the CAD-derived mount and scan assumptions are documented in
+[lidar_config.json](models/source/lidar_config.json). Range, angular resolution,
+and scan rate follow the [FHL-LD19 manufacturer's specifications](https://wiki.youyeetoo.com/en/Lidar/D300).
+The ordinary panel takes an on-demand geometric scan. Reflectivity, hardware
+noise, and individual rotating beam timing are not modeled.
+
+For a live room traversal like the MuJoCo example, run
+`run.cmd --example lidar-room --view`. Sourccey drives past six solid objects,
+slides through the aisle, and turns toward the far wall. A floating LD19 map
+appears at the upper right of the viewport; teal render-only rays show the
+first 2.2 m of the scan from the lower-front mount. The physics query still
+returns ranges up to 12 m. The map refreshes at the nominal 10 Hz while this
+example runs. Use `run.cmd --example lidar-room` for a headless measured run
+that saves `artifacts/examples/lidar-room/lidar_room.json` and its PNG map.
 
 ## Controls and defaults
 

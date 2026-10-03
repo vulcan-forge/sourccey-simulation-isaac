@@ -147,6 +147,18 @@ def build():
         camera.CreateHorizontalApertureAttr(vertical_aperture * 4 / 3)
         camera.CreateFocalLengthAttr(float(vertical_aperture / (2 * np.tan(fovy / 2))))
         camera.CreateClippingRangeAttr(Gf.Vec2f(.005, 100.0))
+    # Fixed URDF front panel is merged into base_link. Keep the provisional
+    # lidar optical frame as a named child so its mount is inspectable in USD.
+    lidar_source = ROOT / 'models/source/lidar_config.json'
+    lidar = json.loads(lidar_source.read_text(encoding='utf-8'))
+    group_name, body_in_group = model.original_frames[lidar['body']]
+    lidar_in_body = np.eye(4)
+    lidar_in_body[:3, 3] = lidar['position_body_m']
+    w, x, y, z = lidar['quaternion_body_wxyz']
+    lidar_in_body[:3, :3] = Rotation.from_quat([x, y, z, w]).as_matrix()
+    lidar_path = '/World/Sourccey/'+group_name+'/lidar_scan_origin'
+    lidar_prim = UsdGeom.Xform.Define(stage, lidar_path)
+    pose(lidar_prim.GetPrim(), body_in_group @ lidar_in_body)
     root = stage.GetPrimAtPath('/World/Sourccey/base_link')
     UsdPhysics.ArticulationRootAPI.Apply(root)
     art = PhysxSchema.PhysxArticulationAPI.Apply(root)
@@ -187,6 +199,8 @@ def build():
     stage.GetRootLayer().Save()
     metadata = {'source_sha256': hashlib.sha256(SOURCE.read_bytes()).hexdigest(),
                 'camera_source_sha256': hashlib.sha256(CAMERA_SOURCE.read_bytes()).hexdigest(),
+                'lidar_source_sha256': hashlib.sha256(lidar_source.read_bytes()).hexdigest(),
+                'lidar_prim': lidar_path,
                 'cameras': list(CAMERA_NAMES),
                 'joints': list(model.joints), 'joint_count': len(model.joints),
                 'rigid_bodies': len(model.groups), 'mass_kg': sum(g['mass'] for g in model.groups.values()),

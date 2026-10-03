@@ -23,10 +23,14 @@ def main():
     p.add_argument('--capture', type=Path)
     p.add_argument('--camera-snapshot', type=Path,
                    help='Save a tiled image from all five simulated robot cameras')
-    p.add_argument('--example', choices=('camera-tour', 'two-arm-reach', 'workshop-demo'),
+    p.add_argument('--lidar-snapshot', type=Path,
+                   help='Save a 180-degree scan as JSON plus a 2D PNG map')
+    p.add_argument('--example', choices=('camera-tour', 'two-arm-reach', 'workshop-demo', 'lidar-demo', 'lidar-room'),
                    help='Run a camera and motion example (headless unless --view)')
     p.add_argument('--view', action='store_true',
-                   help='Play workshop-demo visibly in Isaac with live camera selection')
+                   help='Play workshop-demo or lidar-room visibly in Isaac')
+    p.add_argument('--exit-on-complete', action='store_true',
+                   help='Close a visible example when its scripted motion finishes')
     p.add_argument('--example-output', type=Path, default=ROOT/'artifacts/examples',
                    help='Directory for example camera images')
     p.add_argument('--full-elevator-range', action='store_true')
@@ -36,13 +40,15 @@ def main():
     args, kit_args = p.parse_known_args()
     if args.example and args.camera_snapshot:
         p.error('--example and --camera-snapshot are separate capture modes')
-    if args.view and args.example != 'workshop-demo':
-        p.error('--view currently requires --example workshop-demo')
+    if args.example and args.lidar_snapshot:
+        p.error('--example and --lidar-snapshot are separate capture modes')
+    if args.view and args.example not in ('workshop-demo', 'lidar-room'):
+        p.error('--view requires --example workshop-demo or lidar-room')
     if args.view and args.headless:
         p.error('--view and --headless cannot be combined')
     sys.argv = [sys.argv[0]] + kit_args
     from isaacsim import SimulationApp
-    app = SimulationApp({'headless': args.headless or args.build or args.validate or args.validate_cameras or bool(args.camera_snapshot) or (bool(args.example) and not args.view),
+    app = SimulationApp({'headless': args.headless or args.build or args.validate or args.validate_cameras or bool(args.camera_snapshot) or bool(args.lidar_snapshot) or (bool(args.example) and not args.view),
                          'width': 960, 'height': 640, 'window_width': 1400, 'window_height': 850,
                          'renderer': 'RaytracedLighting', 'anti_aliasing': 0,
                          'multi_gpu': False, 'max_gpu_count': 1, 'fast_shutdown': True,
@@ -70,6 +76,12 @@ def main():
             if args.example == 'workshop-demo':
                 from examples.scene import add_pickup_scene
                 add_pickup_scene(omni.usd.get_context().get_stage())
+            elif args.example == 'lidar-demo':
+                from examples.scene import add_lidar_scene
+                add_lidar_scene(omni.usd.get_context().get_stage())
+            elif args.example == 'lidar-room':
+                from examples.scene import add_lidar_room
+                add_lidar_room(omni.usd.get_context().get_stage())
             else:
                 from examples.scene import add_workbench
                 add_workbench(omni.usd.get_context().get_stage())
@@ -78,7 +90,10 @@ def main():
                          pickup_props=args.example == 'workshop-demo')
         from isaacsim.core.utils.viewports import set_camera_view
         import numpy as np
-        set_camera_view(eye=np.array([1.3, 1.5, 1.15]), target=np.array([0., 0., .65]))
+        if args.example == 'lidar-room':
+            set_camera_view(eye=np.array([5.3, -2.4, 5.2]), target=np.array([1.8, 0., .45]))
+        else:
+            set_camera_view(eye=np.array([1.3, 1.5, 1.15]), target=np.array([0., 0., .65]))
         if args.unity_port:
             from .bridge import PreviewReceiver
             receiver = PreviewReceiver(args.unity_port)
@@ -95,13 +110,17 @@ def main():
                 from examples.camera_tour import run
             elif args.example == 'two-arm-reach':
                 from examples.two_arm_reach import run
+            elif args.example == 'lidar-demo':
+                from examples.lidar_demo import run
+            elif args.example == 'lidar-room':
+                from examples.lidar_room import run
             else:
                 from examples.workshop_demo import run
             result = run(sim, args.example_output / args.example)
             print('SOURCCEY_EXAMPLE ' + json.dumps(result), flush=True)
             if not result['passed']:
                 raise RuntimeError(f"Example failed checks: {result}")
-        elif args.headless or args.camera_snapshot:
+        elif args.headless or args.camera_snapshot or args.lidar_snapshot:
             for _ in range(max(0, round(args.seconds/DT))):
                 if receiver:
                     receiver.poll(sim)
@@ -110,6 +129,10 @@ def main():
             if args.state:
                 args.state.parent.mkdir(parents=True, exist_ok=True)
                 args.state.write_text(json.dumps(state, indent=2))
+            if args.lidar_snapshot:
+                from .lidar import save_snapshot
+                data_path, image_path = save_snapshot(sim, args.lidar_snapshot)
+                print('SOURCCEY_LIDAR_SNAPSHOT '+json.dumps([str(data_path), str(image_path)]), flush=True)
             if args.camera_snapshot:
                 from .cameras import save_tiled
                 print('SOURCCEY_CAMERA_SNAPSHOT ' + str(save_tiled(sim, args.camera_snapshot)), flush=True)
@@ -120,9 +143,14 @@ def main():
             if args.view and panel is None:
                 raise ValueError('--view requires the Sourccey control panel')
             if args.view:
-                from examples.workshop_demo import WorkshopDemo
-                demo = WorkshopDemo(sim)
-                panel.status.text = 'Workshop demo starting; select a camera at any time'
+                if args.example == 'lidar-room':
+                    from examples.lidar_room import LidarRoomDemo
+                    demo = LidarRoomDemo(sim, visible=True)
+                    panel.status.text = 'LD19 room traversal starting; live map at upper right'
+                else:
+                    from examples.workshop_demo import WorkshopDemo
+                    demo = WorkshopDemo(sim)
+                    panel.status.text = 'Workshop demo starting; select a camera at any time'
             else:
                 demo = None
             if args.smoke_ui:
@@ -142,11 +170,17 @@ def main():
                 panel.select_camera('front_left')
                 assert str(get_active_viewport().camera_path) == CAMERA_PATHS['front_left']
                 panel.select_camera(None)
+                panel.save_lidar()
+                lidar_output = ROOT/'artifacts/lidar_scan.json'
+                from .lidar import CONFIG as LIDAR_CONFIG
+                assert len(json.loads(lidar_output.read_text(encoding='utf-8'))['ranges_m']) == LIDAR_CONFIG['beam_count']
+                assert lidar_output.with_suffix('.png').exists()
                 sim.step(250)
                 for name, value in sim.defaults.items():
                     if name not in ('front_left_wheel', 'front_right_wheel', 'rear_left_wheel', 'rear_right_wheel'):
                         assert abs(sim.positions()[name]-value) < .01, name
                 result = {'passed': True, 'panel_created': True, 'camera_selector': True,
+                          'lidar_snapshot': True,
                           'joint_callback': True,
                           'base_callback': True, 'stop': True, 'reset': True, 'state': sim.state()}
                 (ROOT/'docs/ui_validation.json').write_text(json.dumps(result, indent=2)+'\n')
@@ -154,6 +188,7 @@ def main():
                 panel.closed = True
             last, accumulator = time.perf_counter(), 0.
             paused_last = False
+            lidar_reported = False
             print('SOURCCEY_READY '+json.dumps(sim.state()), flush=True)
             while app.is_running() and (panel is None or not panel.closed):
                 now = time.perf_counter()
@@ -168,7 +203,7 @@ def main():
                     paused_last = panel.paused
                 while accumulator >= DT:
                     if sim.world.is_playing() and (panel is None or not panel.paused):
-                        if demo is not None and demo.done and sim.elapsed >= 17.6:
+                        if args.example == 'workshop-demo' and demo is not None and demo.done and sim.elapsed >= 17.6:
                             sim.reset()
                             demo.reset_props()
                             demo = WorkshopDemo(sim)
@@ -183,6 +218,15 @@ def main():
                         if demo is not None:
                             demo.post_step()
                     accumulator -= DT
+                if args.example == 'lidar-room' and demo is not None and demo.done and not lidar_reported:
+                    result = demo.report()
+                    print('SOURCCEY_EXAMPLE ' + json.dumps(result), flush=True)
+                    if not result['passed']:
+                        raise RuntimeError(f'Lidar room example failed checks: {result}')
+                    panel.status.text = 'LD19 room traversal complete; close Isaac when finished'
+                    lidar_reported = True
+                    if args.exit_on_complete:
+                        panel.closed = True
                 sim.world.render()
                 time.sleep(.001)
         if args.capture:
